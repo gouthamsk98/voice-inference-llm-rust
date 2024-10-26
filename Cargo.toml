@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tch = "0.18.0"
-tokenizers = "0.13.1" 
-pyo3 = { version = "0.17", features = ["extension-module"] }  # To call Python code if needed
-serde = { version = "1.0", features = ["derive"] }
+
+candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.7.2", features = ["cuda"] }
+hf-hub = { version = "0.3.2", features = ["tokio"] }

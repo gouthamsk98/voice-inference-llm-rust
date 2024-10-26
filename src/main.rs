@@ -1,20 +1,29 @@
-use tokenizers::Tokenizer;
-use tch::{Device, Tensor, Kind}; // For PyTorch model handling
+use candle_core::{ Device, Result, Tensor };
 
-fn setup_tokenizer(model_path: &str) -> Tokenizer {
-    let tokenizer = Tokenizer::from_pretrained("homebrewltd/llama3.1-s-instruct-v0.2", None)
-        .expect("Tokenizer file could not be loaded");
-    tokenizer
+struct Model {
+    first: Tensor,
+    second: Tensor,
 }
 
-// Example function that uses tokenizer and runs model
-fn main() {
-    let model_path = "homebrewltd/llama3.1-s-instruct-v0.2";
-    let tokenizer = setup_tokenizer(model_path);
+impl Model {
+    fn forward(&self, image: &Tensor) -> Result<Tensor> {
+        let x = image.matmul(&self.first)?;
+        let x = x.relu()?;
+        x.matmul(&self.second)
+    }
+}
 
-    let encoding = tokenizer.encode("Hello, how are you?", true)
-        .expect("Failed to encode input");
-    
-    // Display tokens or use encoding with model
-    println!("Tokens: {:?}", encoding.get_tokens());
+fn main() -> Result<()> {
+    // Use Device::new_cuda(0)?; to use the GPU.
+    let device = Device::new_cuda(0)?;
+
+    let first = Tensor::randn(0f32, 1.0, (784, 100), &device)?;
+    let second = Tensor::randn(0f32, 1.0, (100, 10), &device)?;
+    let model = Model { first, second };
+
+    let dummy_image = Tensor::randn(0f32, 1.0, (1, 784), &device)?;
+
+    let digit = model.forward(&dummy_image)?;
+    println!("Digit {digit:?} digit");
+    Ok(())
 }
