@@ -36,7 +36,7 @@ impl Model {
         }
     }
 
-    pub fn encoder_forward(&mut self, x: &Tensor, flush: bool) -> candle_core::Result<Tensor> {
+    pub fn encoder_forward(&mut self, x: &Tensor, flush: bool) -> candle::Result<Tensor> {
         match self {
             Self::Normal(m) => m.encoder.forward(x, flush),
             Self::Quantized(m) => m.encoder.forward(x, flush),
@@ -48,14 +48,14 @@ impl Model {
         x: &Tensor,
         xa: &Tensor,
         flush: bool
-    ) -> candle_core::Result<Tensor> {
+    ) -> candle::Result<Tensor> {
         match self {
             Self::Normal(m) => m.decoder.forward(x, xa, flush),
             Self::Quantized(m) => m.decoder.forward(x, xa, flush),
         }
     }
 
-    pub fn decoder_final_linear(&self, x: &Tensor) -> candle_core::Result<Tensor> {
+    pub fn decoder_final_linear(&self, x: &Tensor) -> candle::Result<Tensor> {
         match self {
             Self::Normal(m) => m.decoder.final_linear(x),
             Self::Quantized(m) => m.decoder.final_linear(x),
@@ -472,7 +472,17 @@ struct Args {
 }
 
 fn main() -> Result<()> {
-    let args = Args::parse();
+    // use tracing_chrome::ChromeLayerBuilder;
+    // use tracing_subscriber::prelude::*;
+
+    // let args = Args::parse();
+    // let _guard = if args.tracing {
+    //     let (chrome_layer, guard) = ChromeLayerBuilder::new().build();
+    //     tracing_subscriber::registry().with(chrome_layer).init();
+    //     Some(guard)
+    // } else {
+    //     None
+    // };
     let device = candle_examples::device(args.cpu)?;
     let (default_model, default_revision) = if args.quantized {
         ("lmz/candle-whisper", "main")
